@@ -1,7 +1,7 @@
-use crate::api::run_server;
-use crate::cli::{Cli, Commands};
-use crate::models::SchoolDb;
-use crate::report::{build_course_report, build_student_report};
+use crate::common::cli::{Cli, Commands};
+use crate::modules::school::models::SchoolDb;
+use crate::modules::school::report::{build_course_report, build_student_report};
+use crate::presentation::http::server::run_server;
 use clap::Parser;
 
 fn print_students(db: &SchoolDb) {

@@ -1,5 +1,5 @@
-use crate::models::{Course, Role, SchoolDb, Student};
-use crate::report::{
+use crate::modules::school::models::{Course, Role, SchoolDb, Student};
+use crate::modules::school::report::{
     build_course_csv, build_course_pdf, build_course_report, build_student_csv, build_student_pdf,
     build_student_report, CourseReport, StudentReport,
 };
@@ -297,7 +297,8 @@ async fn export_student_csv_api(
         .map_err(|_| api_error(StatusCode::INTERNAL_SERVER_ERROR, "Cannot read db"))?;
     let report =
         build_student_report(&db, &student_id).map_err(|e| api_error(StatusCode::NOT_FOUND, e))?;
-    let bytes = build_student_csv(&report).map_err(|e| api_error(StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    let bytes =
+        build_student_csv(&report).map_err(|e| api_error(StatusCode::INTERNAL_SERVER_ERROR, e))?;
     let mut headers = HeaderMap::new();
     headers.insert(
         CONTENT_TYPE,
@@ -324,7 +325,8 @@ async fn export_course_csv_api(
         .map_err(|_| api_error(StatusCode::INTERNAL_SERVER_ERROR, "Cannot read db"))?;
     let report =
         build_course_report(&db, &course_code).map_err(|e| api_error(StatusCode::NOT_FOUND, e))?;
-    let bytes = build_course_csv(&report).map_err(|e| api_error(StatusCode::INTERNAL_SERVER_ERROR, e))?;
+    let bytes =
+        build_course_csv(&report).map_err(|e| api_error(StatusCode::INTERNAL_SERVER_ERROR, e))?;
     let mut headers = HeaderMap::new();
     headers.insert(
         CONTENT_TYPE,

@@ -1,16 +1,15 @@
-pub mod api;
-pub mod app;
-pub mod cli;
-pub mod db;
-pub mod models;
-pub mod report;
+pub mod application;
+pub mod common;
+pub mod infrastructure;
+pub mod modules;
+pub mod presentation;
 
-pub use app::run;
+pub use application::app::run;
 
 #[cfg(test)]
 mod tests {
-    use crate::models::SchoolDb;
-    use crate::report::{build_student_csv, build_student_pdf, build_student_report};
+    use crate::modules::school::models::SchoolDb;
+    use crate::modules::school::report::{build_student_csv, build_student_pdf, build_student_report};
 
     fn mock_db() -> SchoolDb {
         let mut db = SchoolDb::default();
