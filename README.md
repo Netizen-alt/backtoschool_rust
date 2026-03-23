@@ -1,17 +1,51 @@
-# BackToSchool Rust Project
+# BackToSchool Rust (Final Project)
 
-โปรเจกต์งานจบ BackToSchool ด้วย Rust รองรับทั้ง `CLI` และ `REST API` พร้อมระบบ `login + role` และ `export รายงานเป็น CSV/PDF`
+โปรเจกต์งานจบระบบจัดการโรงเรียนด้วย Rust รองรับทั้ง `CLI` และ `REST API` พร้อมระบบ `login + role` และ export รายงานเป็น `CSV/PDF`
 
-## ฟีเจอร์หลัก
+## จุดเด่น
 
-- จัดการข้อมูลนักเรียน/รายวิชา/การลงทะเบียน/คะแนน
-- ระบบ login (Bearer token)
-- Role-based authorization: `admin`, `teacher`
+- จัดการนักเรียน รายวิชา การลงทะเบียน และคะแนน
+- ยืนยันตัวตนด้วย Bearer Token (`/login`)
+- Authorization ตาม role: `admin`, `teacher`
 - REST API ด้วย `axum`
-- Export รายงานรายนักเรียนและรายวิชาเป็น `CSV` และ `PDF`
-- Unit test ครอบคลุม logic หลัก
+- Export รายงานเป็น CSV/PDF
+- แยกโครงสร้างโฟลเดอร์แบบ layer คล้าย NestJS
+- มี unit tests สำหรับ logic สำคัญ
 
-## Quick Start
+## Architecture (Diagram)
+
+```mermaid
+flowchart TD
+    A["Presentation Layer<br/>src/presentation/http"] --> B["Application Layer<br/>src/application"]
+    B --> C["Modules (Domain)<br/>src/modules/school"]
+    C --> D["Infrastructure Layer<br/>src/infrastructure/persistence"]
+    E["Common Layer<br/>src/common"] --> B
+    E --> A
+```
+
+## โครงสร้างโปรเจกต์
+
+```text
+src/
+  main.rs
+  lib.rs
+  common/
+    cli.rs
+  application/
+    app.rs
+  modules/
+    school/
+      models.rs
+      report.rs
+  infrastructure/
+    persistence/
+      school_db.rs
+  presentation/
+    http/
+      server.rs
+```
+
+## เริ่มใช้งาน
 
 ```bash
 cargo run -- --help
@@ -34,20 +68,20 @@ cargo run -- report-course CS101
 cargo run -- serve
 ```
 
-หรือกำหนด host/port เอง:
+กำหนด host/port เอง:
 
 ```bash
 cargo run -- --addr 127.0.0.1:4000 serve
 ```
 
-## Default Users
+## บัญชีเริ่มต้น
 
-- `admin` / `admin123` (สิทธิ์ admin)
-- `teacher` / `teacher123` (สิทธิ์ teacher)
+- `admin` / `admin123` (admin)
+- `teacher` / `teacher123` (teacher)
 
-## API ตัวอย่าง
+## ตัวอย่างเรียก API
 
-1) Login เพื่อรับ token
+1. Login เพื่อรับ token
 
 ```bash
 curl -X POST http://127.0.0.1:3000/login \
@@ -55,14 +89,14 @@ curl -X POST http://127.0.0.1:3000/login \
   -d "{\"username\":\"teacher\",\"password\":\"teacher123\"}"
 ```
 
-1) เรียก API ที่ต้อง auth
+1. เรียก endpoint ที่ต้อง auth
 
 ```bash
 curl http://127.0.0.1:3000/students \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
-1) Export รายงาน
+1. Export รายงาน
 
 ```bash
 # CSV
@@ -80,8 +114,10 @@ curl -L "http://127.0.0.1:3000/reports/student/S001/pdf" \
 
 - `GET /health`
 - `POST /login`
-- `GET/POST /students` (teacher/admin)
-- `GET/POST /courses` (POST ต้อง admin)
+- `GET /students`
+- `POST /students` (teacher/admin)
+- `GET /courses`
+- `POST /courses` (admin only)
 - `POST /enroll` (teacher/admin)
 - `POST /grade` (teacher/admin)
 - `GET /reports/student/{student_id}`
@@ -91,11 +127,13 @@ curl -L "http://127.0.0.1:3000/reports/student/S001/pdf" \
 - `GET /reports/student/{student_id}/pdf`
 - `GET /reports/course/{course_code}/pdf`
 
-## ทดสอบ
+## รันทดสอบ
 
 ```bash
 cargo test
 ```
 
-> ค่าเริ่มต้นไฟล์ฐานข้อมูลคือ `school_db.json`  
-> เปลี่ยนได้ด้วย `--db` เช่น `cargo run -- --db my_school_data.json serve`
+## หมายเหตุ
+
+- ค่าเริ่มต้นฐานข้อมูลคือ `school_db.json`
+- เปลี่ยน path ได้ด้วย `--db` เช่น `cargo run -- --db my_school_data.json serve`
