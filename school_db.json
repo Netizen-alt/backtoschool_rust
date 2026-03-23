@@ -1,0 +1,21 @@
+{
+  "students": {
+    "S001": {
+      "id": "S001",
+      "name": "Somchai"
+    }
+  },
+  "courses": {
+    "CS101": {
+      "code": "CS101",
+      "title": "Intro to Rust"
+    }
+  },
+  "enrollments": [
+    {
+      "student_id": "S001",
+      "course_code": "CS101",
+      "score": 88.0
+    }
+  ]
+}
