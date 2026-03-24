@@ -3,6 +3,10 @@
     "S001": {
       "id": "S001",
       "name": "Somchai"
+    },
+    "S31": {
+      "id": "S31",
+      "name": ""
     }
   },
   "courses": {
@@ -17,5 +21,17 @@
       "course_code": "CS101",
       "score": 88.0
     }
-  ]
+  ],
+  "users": {
+    "admin": {
+      "username": "admin",
+      "password": "admin123",
+      "role": "admin"
+    },
+    "teacher": {
+      "username": "teacher",
+      "password": "teacher123",
+      "role": "teacher"
+    }
+  }
 }

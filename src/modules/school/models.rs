@@ -36,6 +36,7 @@ pub struct User {
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(default)]
 pub struct SchoolDb {
     pub students: HashMap<String, Student>,
     pub courses: HashMap<String, Course>,

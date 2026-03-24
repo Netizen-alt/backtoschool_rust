@@ -7,90 +7,146 @@ pub async fn ui_page() -> Html<&'static str> {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BackToSchool Test UI</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f6f8fb; }
-    h1 { margin-bottom: 4px; }
-    .muted { color: #666; margin-bottom: 16px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
-    .card { background: #fff; border: 1px solid #dfe4ea; border-radius: 10px; padding: 12px; }
-    .card h3 { margin-top: 0; }
-    input, button, textarea, select { width: 100%; padding: 8px; margin: 4px 0; box-sizing: border-box; }
-    button { cursor: pointer; border: 0; border-radius: 6px; background: #2f6feb; color: #fff; }
-    button.secondary { background: #475569; }
-    pre { background: #0f172a; color: #e2e8f0; padding: 10px; border-radius: 8px; overflow: auto; min-height: 120px; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  </style>
+  <title>BackToSchool Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>BackToSchool Test UI</h1>
-  <div class="muted">ใช้หน้านี้ทดสอบ API ได้ทันที (login, CRUD พื้นฐาน, report/export)</div>
-
-  <div class="grid">
-    <div class="card">
-      <h3>Login</h3>
-      <select id="username">
-        <option value="teacher">teacher</option>
-        <option value="admin">admin</option>
-      </select>
-      <input id="password" type="password" value="teacher123" />
-      <button onclick="login()">Login</button>
-      <input id="token" placeholder="Bearer token" />
-      <small>ระบบจะใส่ token ให้หลัง login</small>
-    </div>
-
-    <div class="card">
-      <h3>Add Student</h3>
-      <input id="studentId" placeholder="S001" />
-      <input id="studentName" placeholder="Somchai" />
-      <button onclick="addStudent()">POST /students</button>
-    </div>
-
-    <div class="card">
-      <h3>Add Course (admin)</h3>
-      <input id="courseCode" placeholder="CS101" />
-      <input id="courseTitle" placeholder="Intro to Rust" />
-      <button onclick="addCourse()">POST /courses</button>
-    </div>
-
-    <div class="card">
-      <h3>Enroll</h3>
-      <div class="row">
-        <input id="enrollStudentId" placeholder="S001" />
-        <input id="enrollCourseCode" placeholder="CS101" />
+<body class="bg-slate-100 text-slate-900">
+  <div class="min-h-screen lg:flex">
+    <aside class="w-full border-b border-slate-200 bg-slate-900 text-slate-100 lg:w-72 lg:border-b-0 lg:border-r">
+      <div class="p-5">
+        <h1 class="text-2xl font-bold">BackToSchool</h1>
+        <p class="mt-1 text-sm text-slate-300">Test Dashboard</p>
       </div>
-      <button onclick="enroll()">POST /enroll</button>
-    </div>
+      <nav class="space-y-1 px-3 pb-5">
+        <button onclick="showPanel('overview')" class="nav-btn w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-800">Overview</button>
+        <button onclick="showPanel('auth')" class="nav-btn w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-800">Auth</button>
+        <button onclick="showPanel('students')" class="nav-btn w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-800">Students</button>
+        <button onclick="showPanel('courses')" class="nav-btn w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-800">Courses</button>
+        <button onclick="showPanel('enrollment')" class="nav-btn w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-800">Enrollment & Grade</button>
+        <button onclick="showPanel('reports')" class="nav-btn w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-800">Reports & Export</button>
+      </nav>
+    </aside>
 
-    <div class="card">
-      <h3>Grade</h3>
-      <div class="row">
-        <input id="gradeStudentId" placeholder="S001" />
-        <input id="gradeCourseCode" placeholder="CS101" />
-      </div>
-      <input id="score" type="number" placeholder="88.5" />
-      <button onclick="grade()">POST /grade</button>
-    </div>
+    <main class="flex-1 p-4 sm:p-6 lg:p-8">
+      <header class="mb-5">
+        <h2 class="text-2xl font-semibold">Dashboard</h2>
+        <p class="text-sm text-slate-600">แยกเมนูให้ใช้งานเป็นส่วน ๆ เหมือน dashboard</p>
+      </header>
 
-    <div class="card">
-      <h3>Query</h3>
-      <button onclick="listStudents()">GET /students</button>
-      <button onclick="listCourses()">GET /courses</button>
-      <input id="reportStudentId" placeholder="Student id for report/export" />
-      <button onclick="studentReport()">GET /reports/student/{id}</button>
-      <button class="secondary" onclick="openExport('student','csv')">Export Student CSV</button>
-      <button class="secondary" onclick="openExport('student','pdf')">Export Student PDF</button>
-      <input id="reportCourseCode" placeholder="Course code for report/export" />
-      <button onclick="courseReport()">GET /reports/course/{code}</button>
-      <button class="secondary" onclick="openExport('course','csv')">Export Course CSV</button>
-      <button class="secondary" onclick="openExport('course','pdf')">Export Course PDF</button>
-    </div>
+      <section id="panel-overview" class="panel">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-sm text-slate-500">Health</p>
+            <p id="healthStatus" class="mt-1 text-lg font-semibold">-</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-sm text-slate-500">Students</p>
+            <p id="studentCount" class="mt-1 text-lg font-semibold">-</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-sm text-slate-500">Courses</p>
+            <p id="courseCount" class="mt-1 text-lg font-semibold">-</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p class="text-sm text-slate-500">Token</p>
+            <p id="tokenState" class="mt-1 text-lg font-semibold">Not set</p>
+          </div>
+        </div>
+        <button onclick="refreshOverview()" class="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Refresh Overview</button>
+      </section>
+
+      <section id="panel-auth" class="panel hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h3 class="mb-3 text-lg font-semibold">Auth</h3>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <select id="username" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+            <option value="teacher">teacher</option>
+            <option value="admin">admin</option>
+          </select>
+          <input id="password" type="password" value="teacher123" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <button onclick="login()" class="mt-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Login</button>
+        <input id="token" placeholder="Bearer token" class="mt-3 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+      </section>
+
+      <section id="panel-students" class="panel hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h3 class="mb-3 text-lg font-semibold">Students</h3>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <input id="studentId" placeholder="S001" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <input id="studentName" placeholder="Somchai" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div class="mt-3 flex gap-2">
+          <button onclick="addStudent()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Add Student</button>
+          <button onclick="listStudents()" class="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">List Students</button>
+        </div>
+      </section>
+
+      <section id="panel-courses" class="panel hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h3 class="mb-3 text-lg font-semibold">Courses</h3>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <input id="courseCode" placeholder="CS101" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <input id="courseTitle" placeholder="Intro to Rust" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div class="mt-3 flex gap-2">
+          <button onclick="addCourse()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Add Course (admin)</button>
+          <button onclick="listCourses()" class="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">List Courses</button>
+        </div>
+      </section>
+
+      <section id="panel-enrollment" class="panel hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h3 class="mb-3 text-lg font-semibold">Enrollment & Grade</h3>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <input id="enrollStudentId" placeholder="Student ID (S001)" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <input id="enrollCourseCode" placeholder="Course Code (CS101)" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <button onclick="enroll()" class="mt-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Enroll</button>
+        <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <input id="gradeStudentId" placeholder="S001" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <input id="gradeCourseCode" placeholder="CS101" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <input id="score" type="number" placeholder="88.5" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <button onclick="grade()" class="mt-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Update Grade</button>
+      </section>
+
+      <section id="panel-reports" class="panel hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h3 class="mb-3 text-lg font-semibold">Reports & Export</h3>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <input id="reportStudentId" placeholder="Student id for report/export" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <input id="reportCourseCode" placeholder="Course code for report/export" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div class="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+          <button onclick="studentReport()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Student Report</button>
+          <button onclick="openExport('student','csv')" class="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">Student CSV</button>
+          <button onclick="openExport('student','pdf')" class="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">Student PDF</button>
+          <button onclick="courseReport()" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Course Report</button>
+          <button onclick="openExport('course','csv')" class="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">Course CSV</button>
+          <button onclick="openExport('course','pdf')" class="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">Course PDF</button>
+        </div>
+      </section>
+
+      <section class="mt-6">
+        <h3 class="mb-2 text-lg font-semibold">Response</h3>
+        <pre id="out" class="min-h-44 overflow-auto rounded-xl bg-slate-900 p-4 text-sm text-slate-100">Ready.</pre>
+      </section>
+    </main>
   </div>
 
-  <h3>Response</h3>
-  <pre id="out">Ready.</pre>
-
   <script>
+    function setOutput(payload) {
+      document.getElementById('out').textContent = typeof payload === 'string'
+        ? payload
+        : JSON.stringify(payload, null, 2);
+    }
+
+    function showPanel(name) {
+      const panels = document.querySelectorAll('.panel');
+      panels.forEach((el) => el.classList.add('hidden'));
+      document.getElementById(`panel-${name}`).classList.remove('hidden');
+      const nav = document.querySelectorAll('.nav-btn');
+      nav.forEach((el) => el.classList.remove('bg-slate-800', 'font-semibold'));
+      const idx = ['overview','auth','students','courses','enrollment','reports'].indexOf(name);
+      if (idx >= 0) nav[idx].classList.add('bg-slate-800', 'font-semibold');
+    }
+
     function authHeaders() {
       const token = document.getElementById('token').value.trim();
       return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -103,7 +159,7 @@ pub async fn ui_page() -> Html<&'static str> {
       const text = await res.text();
       let data = text;
       try { data = JSON.parse(text); } catch (_) {}
-      document.getElementById('out').textContent = JSON.stringify({ status: res.status, data }, null, 2);
+      setOutput({ status: res.status, data });
       return { res, data };
     }
 
@@ -111,7 +167,10 @@ pub async fn ui_page() -> Html<&'static str> {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       const { res, data } = await request('/login', 'POST', { username, password });
-      if (res.ok && data.token) document.getElementById('token').value = data.token;
+      if (res.ok && data.token) {
+        document.getElementById('token').value = data.token;
+        document.getElementById('tokenState').textContent = 'Set';
+      }
     }
     async function addStudent() {
       await request('/students', 'POST', {
@@ -154,7 +213,7 @@ pub async fn ui_page() -> Html<&'static str> {
         : document.getElementById('reportCourseCode').value;
       const token = document.getElementById('token').value.trim();
       if (!token) {
-        document.getElementById('out').textContent = 'Please login first.';
+        setOutput('Please login first.');
         return;
       }
       const base = kind === 'student' ? '/reports/student' : '/reports/course';
@@ -162,7 +221,7 @@ pub async fn ui_page() -> Html<&'static str> {
         .then(async (res) => {
           if (!res.ok) {
             const txt = await res.text();
-            document.getElementById('out').textContent = txt;
+            setOutput(txt);
             return;
           }
           const blob = await res.blob();
@@ -173,6 +232,21 @@ pub async fn ui_page() -> Html<&'static str> {
           URL.revokeObjectURL(a.href);
         });
     }
+
+    async function refreshOverview() {
+      const health = await fetch('/health').then(r => r.json()).catch(() => ({ message: 'down' }));
+      document.getElementById('healthStatus').textContent = health.message || 'unknown';
+      document.getElementById('tokenState').textContent = document.getElementById('token').value.trim() ? 'Set' : 'Not set';
+
+      const headers = authHeaders();
+      const students = await fetch('/students', { headers }).then(async (r) => r.ok ? r.json() : []).catch(() => []);
+      const courses = await fetch('/courses', { headers }).then(async (r) => r.ok ? r.json() : []).catch(() => []);
+      document.getElementById('studentCount').textContent = Array.isArray(students) ? students.length : '-';
+      document.getElementById('courseCount').textContent = Array.isArray(courses) ? courses.length : '-';
+    }
+
+    showPanel('overview');
+    refreshOverview();
   </script>
 </body>
 </html>
