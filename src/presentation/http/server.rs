@@ -3,6 +3,7 @@ use crate::modules::school::report::{
     build_course_csv, build_course_pdf, build_course_report, build_student_csv, build_student_pdf,
     build_student_report, CourseReport, StudentReport,
 };
+use crate::presentation::http::ui::ui_page;
 use axum::extract::{Path as AxumPath, State};
 use axum::http::header::{AUTHORIZATION, CONTENT_DISPOSITION, CONTENT_TYPE};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
@@ -401,6 +402,7 @@ pub async fn run_server(db_path: PathBuf, addr: String) -> Result<(), String> {
     };
 
     let app = Router::new()
+        .route("/", get(ui_page))
         .route("/health", get(health))
         .route("/login", post(login))
         .route("/students", get(list_students_api).post(add_student_api))
