@@ -1,5 +1,9 @@
 {
   "students": {
+    "TEST3131": {
+      "id": "TEST3131",
+      "name": "Test 131"
+    },
     "S001": {
       "id": "S001",
       "name": "Somchai"
@@ -10,6 +14,10 @@
     }
   },
   "courses": {
+    "TC": {
+      "code": "TC",
+      "title": "TTEST"
+    },
     "CS101": {
       "code": "CS101",
       "title": "Intro to Rust"
@@ -20,6 +28,11 @@
       "student_id": "S001",
       "course_code": "CS101",
       "score": 88.0
+    },
+    {
+      "student_id": "TEST3131",
+      "course_code": "TC",
+      "score": 5.0
     }
   ],
   "users": {
