@@ -1,6 +1,6 @@
 # BackToSchool Rust (Final Project)
 
-โปรเจกต์งานจบระบบจัดการโรงเรียนด้วย Rust รองรับทั้ง `CLI` และ `REST API` พร้อมระบบ `login + role` และ export รายงานเป็น `CSV/PDF`
+โปรเจกต์งานจบระบบจัดการโรงเรียนตัวอย่าง ด้วย Rust รองรับทั้ง `CLI` และ `REST API` พร้อมระบบ `login + role` และ export รายงานเป็น `CSV/PDF`
 
 ## จุดเด่น
 

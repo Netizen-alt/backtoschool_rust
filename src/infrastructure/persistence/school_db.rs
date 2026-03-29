@@ -94,6 +94,49 @@ impl SchoolDb {
         Ok(())
     }
 
+    pub fn unenroll(&mut self, student_id: &str, course_code: &str) -> Result<(), String> {
+        let initial_len = self.enrollments.len();
+        self.enrollments.retain(|e| !(e.student_id == student_id && e.course_code == course_code));
+        if self.enrollments.len() == initial_len {
+            return Err("ไม่พบรายการลงทะเบียนนี้".to_string());
+        }
+        Ok(())
+    }
+
+    pub fn delete_student(&mut self, id: &str) -> Result<(), String> {
+        if self.students.remove(id).is_none() {
+            return Err("ไม่พบนักเรียนนี้".to_string());
+        }
+        self.enrollments.retain(|e| e.student_id != id);
+        Ok(())
+    }
+
+    pub fn delete_course(&mut self, code: &str) -> Result<(), String> {
+        if self.courses.remove(code).is_none() {
+            return Err("ไม่พบรายวิชานี้".to_string());
+        }
+        self.enrollments.retain(|e| e.course_code != code);
+        Ok(())
+    }
+
+    pub fn update_student(&mut self, id: &str, new_name: String) -> Result<(), String> {
+        if let Some(student) = self.students.get_mut(id) {
+            student.name = new_name;
+            Ok(())
+        } else {
+            Err("ไม่พบนักเรียนนี้".to_string())
+        }
+    }
+
+    pub fn update_course(&mut self, code: &str, new_title: String) -> Result<(), String> {
+        if let Some(course) = self.courses.get_mut(code) {
+            course.title = new_title;
+            Ok(())
+        } else {
+            Err("ไม่พบรายวิชานี้".to_string())
+        }
+    }
+
     pub fn score_to_grade(score: f32) -> &'static str {
         if score >= 80.0 {
             "A"

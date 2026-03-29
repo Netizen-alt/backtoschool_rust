@@ -8,7 +8,7 @@ use axum::extract::{Path as AxumPath, State};
 use axum::http::header::{AUTHORIZATION, CONTENT_DISPOSITION, CONTENT_TYPE};
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::IntoResponse;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, post, put};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -73,6 +73,16 @@ struct GradeRequest {
     student_id: String,
     course_code: String,
     score: f32,
+}
+
+#[derive(Deserialize)]
+struct UpdateStudentRequest {
+    name: String,
+}
+
+#[derive(Deserialize)]
+struct UpdateCourseRequest {
+    title: String,
 }
 
 fn api_error(code: StatusCode, message: impl Into<String>) -> (StatusCode, Json<ApiError>) {
@@ -256,6 +266,103 @@ async fn list_courses_api(
     Ok(Json(db.courses.values().cloned().collect()))
 }
 
+async fn delete_student_api(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    AxumPath(student_id): AxumPath<String>,
+) -> Result<Json<ApiMessage>, (StatusCode, Json<ApiError>)> {
+    let user = require_auth(&headers, &state)?;
+    require_role(&user, Role::Teacher)?;
+    let mut db = state
+        .db
+        .lock()
+        .map_err(|_| api_error(StatusCode::INTERNAL_SERVER_ERROR, "Cannot write db"))?;
+    db.delete_student(&student_id)
+        .map_err(|e| api_error(StatusCode::BAD_REQUEST, e))?;
+    save_db_locked(&state, &db)?;
+    Ok(Json(ApiMessage {
+        message: "ลบนักเรียนสำเร็จ".to_string(),
+    }))
+}
+
+async fn update_student_api(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    AxumPath(student_id): AxumPath<String>,
+    Json(req): Json<UpdateStudentRequest>,
+) -> Result<Json<ApiMessage>, (StatusCode, Json<ApiError>)> {
+    let user = require_auth(&headers, &state)?;
+    require_role(&user, Role::Teacher)?;
+    let mut db = state
+        .db
+        .lock()
+        .map_err(|_| api_error(StatusCode::INTERNAL_SERVER_ERROR, "Cannot write db"))?;
+    db.update_student(&student_id, req.name)
+        .map_err(|e| api_error(StatusCode::BAD_REQUEST, e))?;
+    save_db_locked(&state, &db)?;
+    Ok(Json(ApiMessage {
+        message: "แก้ไขชื่อนักเรียนสำเร็จ".to_string(),
+    }))
+}
+
+async fn delete_course_api(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    AxumPath(course_code): AxumPath<String>,
+) -> Result<Json<ApiMessage>, (StatusCode, Json<ApiError>)> {
+    let user = require_auth(&headers, &state)?;
+    require_role(&user, Role::Admin)?;
+    let mut db = state
+        .db
+        .lock()
+        .map_err(|_| api_error(StatusCode::INTERNAL_SERVER_ERROR, "Cannot write db"))?;
+    db.delete_course(&course_code)
+        .map_err(|e| api_error(StatusCode::BAD_REQUEST, e))?;
+    save_db_locked(&state, &db)?;
+    Ok(Json(ApiMessage {
+        message: "ลบรายวิชาสำเร็จ".to_string(),
+    }))
+}
+
+async fn update_course_api(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    AxumPath(course_code): AxumPath<String>,
+    Json(req): Json<UpdateCourseRequest>,
+) -> Result<Json<ApiMessage>, (StatusCode, Json<ApiError>)> {
+    let user = require_auth(&headers, &state)?;
+    require_role(&user, Role::Admin)?;
+    let mut db = state
+        .db
+        .lock()
+        .map_err(|_| api_error(StatusCode::INTERNAL_SERVER_ERROR, "Cannot write db"))?;
+    db.update_course(&course_code, req.title)
+        .map_err(|e| api_error(StatusCode::BAD_REQUEST, e))?;
+    save_db_locked(&state, &db)?;
+    Ok(Json(ApiMessage {
+        message: "แก้ไขชื่อรายวิชาสำเร็จ".to_string(),
+    }))
+}
+
+async fn unenroll_api(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(req): Json<EnrollRequest>,
+) -> Result<Json<ApiMessage>, (StatusCode, Json<ApiError>)> {
+    let user = require_auth(&headers, &state)?;
+    require_role(&user, Role::Teacher)?;
+    let mut db = state
+        .db
+        .lock()
+        .map_err(|_| api_error(StatusCode::INTERNAL_SERVER_ERROR, "Cannot write db"))?;
+    db.unenroll(&req.student_id, &req.course_code)
+        .map_err(|e| api_error(StatusCode::BAD_REQUEST, e))?;
+    save_db_locked(&state, &db)?;
+    Ok(Json(ApiMessage {
+        message: "ยกเลิกการลงทะเบียนสำเร็จ".to_string(),
+    }))
+}
+
 async fn report_student_api(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -406,8 +513,11 @@ pub async fn run_server(db_path: PathBuf, addr: String) -> Result<(), String> {
         .route("/health", get(health))
         .route("/login", post(login))
         .route("/students", get(list_students_api).post(add_student_api))
+        .route("/students/{student_id}", delete(delete_student_api).put(update_student_api))
         .route("/courses", get(list_courses_api).post(add_course_api))
+        .route("/courses/{course_code}", delete(delete_course_api).put(update_course_api))
         .route("/enroll", post(enroll_api))
+        .route("/unenroll", post(unenroll_api))
         .route("/grade", post(grade_api))
         .route("/reports/student/{student_id}", get(report_student_api))
         .route("/reports/course/{course_code}", get(report_course_api))
